@@ -40,4 +40,7 @@ public class Account {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Version
+    private Long version;
+
 }
