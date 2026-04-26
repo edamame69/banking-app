@@ -1,0 +1,21 @@
+cat > .gitignore << 'EOF'
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IntelliJ
+.idea/
+*.iml
+.claude/
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# Environment
+.env
+EOF
