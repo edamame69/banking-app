@@ -60,8 +60,8 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "Transaction conflict, please try again"));
     }
 
-    @ExceptionHandler(DaiLyTransferLimitExceededException.class)
-    public ResponseEntity<Map<String, String>> handleDaiLyTransferLimitExceeded(DaiLyTransferLimitExceededException ex) {
+    @ExceptionHandler(DailyTransferLimitExceededException.class)
+    public ResponseEntity<Map<String, String>> handleDaiLyTransferLimitExceeded(DailyTransferLimitExceededException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
