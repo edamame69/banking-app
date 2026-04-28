@@ -77,7 +77,7 @@ public class TransactionService {
                         startOfDay);
 
         if(transferredToday.add(request.amount()).compareTo(dailyLimit) > 0) {
-            throw new DaiLyTransferLimitExceededException(dailyLimit);
+            throw new DailyTransferLimitExceededException(dailyLimit);
         }
         //Tạo ref number
         String transferRef = "TRF" + Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8);

@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DailyTransferLimitExceededException.class)
-    public ResponseEntity<Map<String, String>> handleDaiLyTransferLimitExceeded(DailyTransferLimitExceededException ex) {
+    public ResponseEntity<Map<String, String>> handleDailyTransferLimitExceeded(DailyTransferLimitExceededException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
