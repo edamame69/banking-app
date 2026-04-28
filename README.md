@@ -8,7 +8,8 @@
 
 A production-grade banking backend built to understand how money moves safely — not just how to write CRUD endpoints.
 
-**Live API:** https://reasonable-reprieve-production.up.railway.app/swagger-ui/index.html
+**Live API:** [https://reasonable-reprieve-production.up.railway.app/swagger-ui/index.html](https://banking-application.up.railway.app/swagger-ui/index.html)
+
 
 ---
 
