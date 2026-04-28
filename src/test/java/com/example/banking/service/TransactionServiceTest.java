@@ -3,6 +3,7 @@ package com.example.banking.service;
 import com.example.banking.domain.*;
 import com.example.banking.dto.TransactionResponse;
 import com.example.banking.dto.TransferRequest;
+import com.example.banking.exception.DailyTransferLimitExceededException;
 import com.example.banking.exception.InsufficientFundsException;
 import com.example.banking.exception.UnauthorizedException;
 import com.example.banking.repository.AccountRepository;
@@ -170,6 +171,48 @@ class TransactionServiceTest {
 
         // Act & Assert
         assertThrows(UnauthorizedException.class, () ->
+                transactionService.transfer(request));
+    }
+
+    @Test
+    void shouldThrowWhenDailyLimitExceeded() {
+
+        String email = "user@banking.com";
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail(email);
+        user.setRole(Role.CUSTOMER);
+
+        Account sourceAccount = new Account();
+        sourceAccount.setAccountNumber("VN1111");
+        sourceAccount.setBalance(new BigDecimal("100000000"));
+        sourceAccount.setUser(user);
+
+
+        Account targetAccount = new Account();
+        targetAccount.setAccountNumber("VN2222");
+        targetAccount.setBalance(new BigDecimal("500000"));
+        targetAccount.setUser(user);
+
+        TransferRequest request = new TransferRequest(
+                "VN1111",
+                "VN2222",
+                new BigDecimal("10000000"),
+                "Test limit");
+
+        when(transactionRepository.sumAmountByAccountAndTypeAndDateAfter(
+                any(Account.class),
+                any(TransactionType.class),
+                any(Instant.class)))
+                .thenReturn(new BigDecimal("45000000"));
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(accountRepository.findByAccountNumber("VN1111")).thenReturn(Optional.of(sourceAccount));
+        when(accountRepository.findByAccountNumber("VN2222")).thenReturn(Optional.of(targetAccount));
+
+        // Act & Assert
+        assertThrows(DailyTransferLimitExceededException.class, () ->
                 transactionService.transfer(request));
     }
 }
