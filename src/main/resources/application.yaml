@@ -19,6 +19,8 @@ app:
   jwt:
     secret: ${APP_JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     expiration: ${APP_JWT_EXPIRATION:86400000}
+  transfer:
+    daily-limit: 50000000
 
 logging:
   level:

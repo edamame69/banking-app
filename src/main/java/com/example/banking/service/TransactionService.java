@@ -6,21 +6,22 @@ import com.example.banking.domain.TransactionType;
 import com.example.banking.domain.User;
 import com.example.banking.dto.TransactionResponse;
 import com.example.banking.dto.TransferRequest;
-import com.example.banking.exception.AccountNotFoundException;
-import com.example.banking.exception.InsufficientFundsException;
-import com.example.banking.exception.UnauthorizedException;
-import com.example.banking.exception.UserNotFoundException;
+import com.example.banking.exception.*;
 import com.example.banking.repository.AccountRepository;
 import com.example.banking.repository.TransactionRepository;
 import com.example.banking.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Service
@@ -30,6 +31,9 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+
+    @Value("${app.transfer.daily-limit}")
+    private BigDecimal dailyLimit;
 
     @Transactional
     public TransactionResponse transfer(TransferRequest request) {
@@ -62,6 +66,19 @@ public class TransactionService {
 
         }
 
+        Instant startOfDay = LocalDate.now()
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+
+        BigDecimal transferredToday = transactionRepository
+                .sumAmountByAccountAndTypeAndDateAfter(
+                        sourceAccount,
+                        TransactionType.DEBIT,
+                        startOfDay);
+
+        if(transferredToday.add(request.amount()).compareTo(dailyLimit) > 0) {
+            throw new DaiLyTransferLimitExceededException(dailyLimit);
+        }
         //Tạo ref number
         String transferRef = "TRF" + Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8);
 
