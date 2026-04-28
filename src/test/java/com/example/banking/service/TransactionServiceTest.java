@@ -1,9 +1,6 @@
 package com.example.banking.service;
 
-import com.example.banking.domain.Account;
-import com.example.banking.domain.Role;
-import com.example.banking.domain.Transaction;
-import com.example.banking.domain.User;
+import com.example.banking.domain.*;
 import com.example.banking.dto.TransactionResponse;
 import com.example.banking.dto.TransferRequest;
 import com.example.banking.exception.InsufficientFundsException;
@@ -20,8 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,6 +46,9 @@ class TransactionServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Inject dailyLimit value thủ công
+        ReflectionTestUtils.setField(transactionService, "dailyLimit", new BigDecimal("50000000"));
+
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user@banking.com");
@@ -117,6 +119,12 @@ class TransactionServiceTest {
                 new BigDecimal("500000"), // chuyển 500k — đủ tiền!
                 "Test transfer"
         );
+
+        when(transactionRepository.sumAmountByAccountAndTypeAndDateAfter(
+                any(Account.class),
+                any(TransactionType.class),
+                any(Instant.class)))
+                .thenReturn(BigDecimal.ZERO); // chưa transfer ngày nào
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(accountRepository.findByAccountNumber("VN1111")).thenReturn(Optional.of(sourceAccount));
